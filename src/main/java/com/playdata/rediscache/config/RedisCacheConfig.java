@@ -20,26 +20,28 @@ public class RedisCacheConfig {
     @Bean
     public CacheManager boardCacheManager(RedisConnectionFactory redisConnectionFactory) {
         // 레디스 캐시 기본 설정을 담당하는 객체를 불러옴.
+        // RedisCacheConfiguration 객체는 불변 객체라서 기존 객체가 변경되는 게 아니라 새로운 객체를 반환함.
+        // 설정 잡을 때 한 번에 설정해 주셔야 함!
         RedisCacheConfiguration redisCacheConfiguration
-                = RedisCacheConfiguration.defaultCacheConfig();
+                = RedisCacheConfiguration.defaultCacheConfig()
 
         // Key 직렬화 설정.
         // 직렬화: 자바 객체를 저장/전송 가능한 형태로 변환하는 것
-        redisCacheConfiguration.serializeKeysWith(
+        .serializeKeysWith(
                 RedisSerializationContext.SerializationPair.fromSerializer(
                         new StringRedisSerializer()
                 )
-        );
+        )
 
         // Value의 직렬화 설정 -> JSON 형태로 직렬화해서 저장.
-        redisCacheConfiguration.serializeValuesWith(
+        .serializeValuesWith(
                 RedisSerializationContext.SerializationPair.fromSerializer(
                         new Jackson2JsonRedisSerializer<Object>(Object.class)
                 )
-        );
+        )
 
         // 캐시 데이터의 만료 기간 (Time To Live) 설정
-        redisCacheConfiguration.entryTtl(Duration.ofMinutes(1));
+        .entryTtl(Duration.ofMinutes(1));
 
         // spring의 CacheManager의 구현체 (Redis용)
         // 접속을 위한 factory, 위에서 설정한 config 정보를 담은 객체를 전달해서 build 후 빈 등록.
